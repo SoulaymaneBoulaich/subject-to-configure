@@ -7,7 +7,7 @@
             ├── encoding.ipynb
         └── 📁input
             ├── master_data_imputed.csv
-        └── 📁vis
+        └── 📁vis #ilham + tasnim
             └── 📁code_vis
                 ├── code.ipynb
                 ├── code.py
