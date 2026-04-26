@@ -31,25 +31,25 @@ plt.rcParams.update({
     "axes.titlepad":    12,
 })
 
-MH_COLORS   = {"Excellent": "#3266ad", "Good": "#5ca85c", "Fair": "#e8a838", "Poor": "#c94040"}
-MH_ORDER    = ["Excellent", "Good", "Fair", "Poor"]
-GAD_ORDER   = ["Minimal", "Mild", "Moderate", "Severe"]
-PHQ_ORDER   = ["None-Minimal", "Mild", "Moderate", "Moderately Severe", "Severe"]
-PLAT_COLOR  = "#5e9bdc"
+MH_COLORS  = {"Excellent": "#3266ad", "Good": "#5ca85c", "Fair": "#e8a838", "Poor": "#c94040"}
+MH_ORDER   = ["Excellent", "Good", "Fair", "Poor"]
+GAD_ORDER  = ["Minimal", "Mild", "Moderate", "Severe"]
+PHQ_ORDER  = ["None-Minimal", "Mild", "Moderate", "Moderately Severe", "Severe"]
+PLAT_COLOR = "#5e9bdc"
 
 # ─── CHARGEMENT DES DONNÉES ───────────────────────────────────────────────────
-CSV_PATH = "master_data_imputed.csv"   # <-- mets le bon chemin si nécessaire
+CSV_PATH = "master_data_imputed.csv"
 
 print("Chargement des données...")
-df = pd.read_csv(CSV_PATH)
+df = pd.read_csv(CSV_PATH)   # ← ligne critique corrigée
 print(f"  → {len(df):,} lignes × {df.shape[1]} colonnes")
 
 # Nettoyage stress_level (mixte texte/numérique)
 def clean_stress(v):
     try:
         f = float(v)
-        if f < 4:   return "Low"
-        if f > 7:   return "High"
+        if f < 4:  return "Low"
+        if f > 7:  return "High"
         return "Medium"
     except:
         return str(v)
@@ -82,13 +82,11 @@ def graphe1():
         radius=1.0,
     )
 
-    # Centre
     ax.text(0, 0.08, f"{total:,.0f}", ha="center", va="center",
             fontsize=22, fontweight="bold", color="#eeeeee")
     ax.text(0, -0.18, "utilisateurs", ha="center", va="center",
             fontsize=10, color="#888888")
 
-    # Légende avec %
     legend_labels = [
         f"{m}  —  {counts[m]:,.0f}  ({counts[m]/total*100:.1f}%)"
         for m in MH_ORDER
@@ -96,8 +94,7 @@ def graphe1():
     patches = [mpatches.Patch(color=MH_COLORS[m], label=l)
                for m, l in zip(MH_ORDER, legend_labels)]
     ax.legend(handles=patches, loc="lower center", bbox_to_anchor=(0.5, -0.12),
-              frameon=False, fontsize=10, ncol=2,
-              labelcolor="#cccccc")
+              frameon=False, fontsize=10, ncol=2, labelcolor="#cccccc")
 
     ax.set_title("Graphe 1 — Distribution de la santé mentale", color="#eeeeee")
     plt.tight_layout()
@@ -131,7 +128,6 @@ def graphe2():
         patch.set_facecolor(MH_COLORS[mh])
         patch.set_alpha(0.85)
 
-    # Moyennes
     means = [d.mean() for d in data]
     ax.plot(range(1, len(MH_ORDER)+1), means, "D",
             color="#ffffff", markersize=6, zorder=5, label="Moyenne")
@@ -154,7 +150,7 @@ def graphe2():
 # GRAPHE 3 — Sommeil × Stress (Violinplot)
 # ══════════════════════════════════════════════════════════════════════════════
 def graphe3():
-    stress_order = ["Low", "Medium", "High"]
+    stress_order  = ["Low", "Medium", "High"]
     stress_colors = {"Low": "#5ca85c", "Medium": "#e8a838", "High": "#c94040"}
 
     sub = df[df["stress_level_clean"].isin(stress_order)].copy()
@@ -178,11 +174,11 @@ def graphe3():
     parts["cmedians"].set_color("#ffffff")
     parts["cmedians"].set_linewidth(2)
 
-    # Boxplot intérieur
     for i, s in enumerate(stress_order):
         d = sub[sub["stress_level_clean"] == s]["sleep_hours"]
         q1, med, q3 = d.quantile([0.25, 0.5, 0.75])
-        ax.plot([i, i], [q1, q3], color="#ffffff", linewidth=4, solid_capstyle="round", zorder=3)
+        ax.plot([i, i], [q1, q3], color="#ffffff", linewidth=4,
+                solid_capstyle="round", zorder=3)
         ax.plot(i, med, "o", color="#0f0f0f", markersize=5, zorder=4)
 
     ax.set_xticks(range(len(stress_order)))
@@ -215,7 +211,6 @@ def graphe4():
                    color=arch_colors[:len(counts)], height=0.55,
                    edgecolor="#0f0f0f", linewidth=0.5)
 
-    # Valeurs + %
     total = counts.sum()
     for bar, val in zip(bars, counts.values):
         ax.text(val + total * 0.005, bar.get_y() + bar.get_height() / 2,
@@ -236,43 +231,43 @@ def graphe4():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GRAPHE 5 — Plateformes × Santé mentale (Bar groupé)
+# GRAPHE 5 — Plateformes × Santé mentale (Stacked bar)
 # ══════════════════════════════════════════════════════════════════════════════
 def graphe5():
     platforms = df["primary_platform"].value_counts().index.tolist()
 
-    # Calcul des % par plateforme
     records = []
     for p in platforms:
-        sub = df[df["primary_platform"] == p]
+        sub   = df[df["primary_platform"] == p]
         total = len(sub)
         for mh in MH_ORDER:
             pct = (sub["mental_health_status"] == mh).sum() / total * 100
             records.append({"platform": p, "mh": mh, "pct": pct})
 
-    pivot = pd.DataFrame(records).pivot(index="platform", columns="mh", values="pct")
-    pivot = pivot.reindex(columns=MH_ORDER).fillna(0)
-
-    n_plat = len(pivot)
-    n_mh   = len(MH_ORDER)
-    x      = np.arange(n_plat)
-    width  = 0.18
+    pivot = pd.DataFrame(records).pivot(
+        index="platform", columns="mh", values="pct"
+    ).reindex(columns=MH_ORDER).fillna(0)
 
     fig, ax = plt.subplots(figsize=(13, 6))
 
-    for i, mh in enumerate(MH_ORDER):
-        offset = (i - n_mh / 2 + 0.5) * width
-        bars   = ax.bar(x + offset, pivot[mh], width,
-                        color=MH_COLORS[mh], alpha=0.88,
-                        label=mh, edgecolor="#0f0f0f", linewidth=0.3)
+    bottom = np.zeros(len(pivot))
+    for mh in MH_ORDER:
+        ax.bar(pivot.index, pivot[mh], bottom=bottom,
+               color=MH_COLORS[mh], label=mh,
+               edgecolor="#0f0f0f", linewidth=0.3)
+        bottom += pivot[mh].values
 
-    ax.set_xticks(x)
-    ax.set_xticklabels(pivot.index, rotation=25, ha="right")
+    for i, p in enumerate(pivot.index):
+        total = len(df[df["primary_platform"] == p])
+        ax.text(i, 103, f"n={total:,}", ha="center",
+                fontsize=8, color="#888888")
+
     ax.set_ylabel("% d'utilisateurs")
     ax.set_title("Graphe 5 — Plateformes vs Santé mentale")
+    ax.set_ylim(0, 115)
     ax.legend(frameon=False, fontsize=9)
     ax.grid(axis="y", alpha=0.3)
-    ax.set_ylim(0, 115)
+    ax.tick_params(axis="x", rotation=25)
 
     plt.tight_layout()
     plt.savefig("graphe5_plateformes.png", dpi=150, bbox_inches="tight", facecolor="#0f0f0f")
@@ -299,18 +294,13 @@ def graphe6():
 
     cmap = sns.diverging_palette(220, 10, as_cmap=True)
     sns.heatmap(
-        corr,
-        ax=ax,
-        cmap=cmap,
+        corr, ax=ax, cmap=cmap,
         vmin=-1, vmax=1, center=0,
         annot=True, fmt=".2f",
         annot_kws={"size": 9, "color": "#eeeeee"},
-        linewidths=0.5,
-        linecolor="#0f0f0f",
-        square=True,
-        cbar_kws={"shrink": 0.75},
-        xticklabels=labels,
-        yticklabels=labels,
+        linewidths=0.5, linecolor="#0f0f0f",
+        square=True, cbar_kws={"shrink": 0.75},
+        xticklabels=labels, yticklabels=labels,
     )
 
     ax.set_title("Graphe 6 — Matrice de corrélation (Pearson)")
@@ -341,14 +331,10 @@ def graphe7():
 
     cmap = sns.color_palette("Blues", as_cmap=True)
     sns.heatmap(
-        pivot,
-        ax=ax,
-        cmap=cmap,
-        annot=True,
-        fmt=",",
+        pivot, ax=ax, cmap=cmap,
+        annot=True, fmt=",",
         annot_kws={"size": 10},
-        linewidths=0.5,
-        linecolor="#0f0f0f",
+        linewidths=0.5, linecolor="#0f0f0f",
         cbar_kws={"shrink": 0.75, "label": "Nombre d'utilisateurs"},
     )
 
@@ -370,13 +356,13 @@ if __name__ == "__main__":
     print("  VISUALISATION MULTIVARIÉE — Digital Health Dataset")
     print("=" * 55)
 
-    graphe1()   # Donut — santé mentale
-    graphe2()   # Boxplot — écran vs santé mentale
-    graphe3()   # Violinplot — sommeil vs stress
-    graphe4()   # Bar horizontal — archétypes
-    graphe5()   # Bar groupé — plateformes vs santé mentale
-    graphe6()   # Heatmap — corrélations
-    graphe7()   # Heatmap — GAD-7 × PHQ-9
+    graphe1()
+    graphe2()
+    graphe3()
+    graphe4()
+    graphe5()
+    graphe6()
+    graphe7()
 
     print("\n✅ Tous les graphes générés !")
     print("   Les fichiers PNG sont dans le dossier courant.")
