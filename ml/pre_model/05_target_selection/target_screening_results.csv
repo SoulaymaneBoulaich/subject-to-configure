@@ -1,0 +1,19 @@
+target,best_alpha,cv_R2,holdout_R2,holdout_RMSE,n_selected,skewness,kurtosis_exc,top3_features
+mental_wellness_index,0.001074,0.6575,0.6695,0.6259,17,17.525,458.974,"sleep_quality, work_screen_hours, productivity_score"
+productivity_score,0.003788,0.6432,0.5855,0.6844,18,10.245,114.56,"occ_Employed, sleep_quality, mental_wellness_index"
+age,0.001415,0.4759,0.4789,0.7152,20,2.437,5.122,"mental_health_status, support_systems_access, online_support_usage"
+mental_health_status,0.004041,0.4717,0.476,0.7334,13,-2.684,5.948,"age, online_support_usage, support_systems_access"
+online_support_usage,0.002095,0.3671,0.366,0.8041,17,2.769,5.668,"age, mental_health_status, support_systems_access"
+support_systems_access,0.002719,0.3669,0.3532,0.8087,16,2.79,5.786,"age, mental_health_status, online_support_usage"
+stress_level,0.000846,0.2728,0.2707,0.8492,22,-0.84,0.7,"mood_level, age, mental_wellness_index"
+screen_time_hours,0.000723,0.2509,0.254,0.8677,21,1.073,1.238,"age, mental_health_status, productivity_score"
+mood_level,0.000923,0.2453,0.2368,0.8716,20,-0.048,2.182,"stress_level, sleep_hours, productivity_score"
+sleep_hours,0.000979,0.1782,0.172,0.9071,20,0.045,-0.366,"mood_level, gender, screen_time_hours"
+gender,0.002003,0.1329,0.1272,0.9321,19,1.396,-0.053,"sleep_hours, mental_health_status, support_systems_access"
+exercise_minutes_per_week,0.034455,0.0536,0.1065,0.9015,2,6.516,266.639,"mental_wellness_index, occ_Unemployed"
+daily_exercise_mins,0.000542,0.0432,0.0341,0.96,17,2.962,12.756,"mood_level, gender, mental_health_status"
+tech_usage_hours,0.006773,0.0013,0.0033,1.0019,7,0.128,6.584,"age, physical_activity_hours, gaming_hours"
+gaming_hours,0.015584,0.0003,0.0003,1.0077,1,-0.052,6.506,tech_usage_hours
+physical_activity_hours,0.006206,0.0004,0.0002,1.0164,5,0.029,6.431,"tech_usage_hours, support_systems_access, online_support_usage"
+social_media_hours,0.019828,0.0,0.0,0.9945,1,0.07,6.453,tech_usage_hours
+social_hours_per_week,0.073566,0.0,-0.0,1.0317,0,3.519,238.206,none
